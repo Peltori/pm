@@ -174,8 +174,15 @@ cython_debug/
 
 .DS_Store
 
+# Node / Next.js
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/package-lock.json
 
-# AI related
-AGENTS.md
-backend/AGENTS.md
-docs/PLAN.md
+# Test artifacts
+test-results/
+frontend/test-results/
+
+

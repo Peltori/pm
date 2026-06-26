@@ -21,11 +21,12 @@ For the MVP, this will run locally (in a docker container)
 ## Technical Decisions
 
 - NextJS frontend with tailwind css for styling and shadcn ui elements for easy component building
+- Use pnpm for frontend dependency management
 - Python FastAPI backend, including serving the static NextJS site at /
 - Everything packaged into a Docker container
 - Use "uv" as the package manager for python in the Docker container
 - Use OpenRouter for the AI calls. An OPENROUTER_API_KEY is in .env in the project root
-- Use `qwen/qwen3-coder:free` as the model
+- Use `poolside/laguna-xs.2:free` as the model
 - Use SQLLite local database for the database, creating a new db if it doesn't exist
 - Start and Stop server scripts for Mac, PC, Linux in scripts/
 
