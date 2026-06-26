@@ -174,3 +174,8 @@ cython_debug/
 
 .DS_Store
 
+
+# AI related
+AGENTS.md
+backend/AGENTS.md
+docs/PLAN.md
