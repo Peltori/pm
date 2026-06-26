@@ -49,6 +49,13 @@ A working MVP of the frontend has been built and is already in frontend. This is
 3. Be concise. Keep README minimal. IMPORTANT: no emojis ever
 4. When hitting issues, always identify root cause before trying a fix. Do not guess. Prove with evidence, then fix the root cause.
 
+## Workflow
+
+- Always prompt the user for approval before running any terminal/command-line commands
+- Always ask the user about the branch name before creating a new branch
+- Never push directly to main - always push to feature/bugfix/refactor/chore branches
+- After every phase is complete, make a git commit and ask the user before pushing
+
 ## Working documentation
 
 All documents for planning and executing this project will be in the docs/ directory.
