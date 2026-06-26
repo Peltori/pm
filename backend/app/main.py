@@ -1,15 +1,20 @@
-import os
-
-from dotenv import load_dotenv
-
-load_dotenv()
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .ai_routes import router as ai_router
+from .database import init_db, seed
 
-app = FastAPI(title="Kanban Studio")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    seed()
+    yield
+
+
+app = FastAPI(title="Kanban Studio", lifespan=lifespan)
 
 app.include_router(ai_router, prefix="/api")
 
