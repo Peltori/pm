@@ -131,15 +131,15 @@ cards
   - sort_order (INTEGER)
 ```
 
-- [ ] Document schema in `docs/DATABASE.md`
-- [ ] Create Alembic migrations (or manual schema SQL)
-- [ ] Create `backend/database.py` with SQLAlchemy engine setup
-- [ ] User reviews and approves schema
-- [ ] Seed initial data for development
+- [x] Document schema in `docs/DATABASE.md`
+- [x] Use SQLAlchemy ORM models directly (no Alembic for MVP)
+- [x] Create `backend/database.py` with SQLAlchemy engine, models, and seed data
+- [x] User reviews and approves schema
+- [x] Seed initial data (1 user, 1 board, 5 columns, 8 cards)
 
 **Tests:**
-- Unit: database creates tables if they don't exist
-- Unit: initial seed data populates correctly
+- Unit: database creates tables if they don't exist ✅
+- Unit: initial seed data populates correctly (5 columns, 8 cards) ✅
 
 ---
 
