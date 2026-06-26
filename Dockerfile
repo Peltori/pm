@@ -22,19 +22,26 @@ COPY backend/.env ./
 
 FROM python:3.12-slim
 
+RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y --no-install-recommends nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app/backend
 
 COPY --from=backend-build /app/backend/.venv /app/backend/.venv
 COPY --from=backend-build /app/backend/app /app/backend/app
 COPY --from=backend-build /app/backend/.env /app/backend/.env
-COPY --from=backend-build /app/backend/.env /app/backend/.env
-COPY --from=frontend-build /app/frontend/.next /app/frontend/.next
-RUN mkdir -p /app/frontend/out && \
-    echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Kanban Studio</title></head><body><h1>Kanban Studio</h1><p>Hello World — Part 2 scaffolding</p></body></html>' > /app/frontend/out/index.html
+
+# Next.js standalone build
+COPY --from=frontend-build /app/frontend/.next/standalone /app/standalone
+COPY --from=frontend-build /app/frontend/public /app/standalone/public
+COPY --from=frontend-build /app/frontend/.next/static /app/standalone/.next/static
 
 ENV PATH="/app/backend/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
+ENV PORT=3000
 
-EXPOSE 8000
+EXPOSE 3000 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "node /app/standalone/server.js & uvicorn app.main:app --host 0.0.0.0 --port 8000"]
