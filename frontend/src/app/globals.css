@@ -10,26 +10,11 @@
   --surface-strong: #ffffff;
   --stroke: rgba(3, 33, 71, 0.08);
   --shadow: 0 18px 40px rgba(3, 33, 71, 0.12);
-}
-
-:root {
   --bg: var(--surface);
   --bg-strong: var(--surface-strong);
   --text: var(--navy-dark);
   --text-muted: var(--gray-text);
   --border: var(--stroke);
-  --shadow: var(--shadow);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111111;
-    --bg-strong: #1e1e1e;
-    --text: #e0e0e0;
-    --text-muted: #888888;
-    --border: rgba(255, 255, 255, 0.1);
-    --shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
-  }
 }
 
 [data-theme="dark"] {
