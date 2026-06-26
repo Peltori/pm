@@ -1,8 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+test.use({ storageState: { cookies: [{ name: "session", value: "authenticated", domain: "127.0.0.1", path: "/", sameSite: "Strict" }] } });
+
 test("loads the kanban board", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Kanban Studio" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Kanban Studio" }).first()).toBeVisible();
   await expect(page.locator('[data-testid^="column-"]')).toHaveCount(5);
 });
 
@@ -38,4 +40,37 @@ test("moves a card between columns", async ({ page }) => {
   );
   await page.mouse.up();
   await expect(targetColumn.getByTestId("card-card-1")).toBeVisible();
+});
+
+test("login page is accessible without session", async ({ page }) => {
+  await page.context().clearCookies();
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Kanban Studio" }).first()).toBeVisible();
+  await expect(page.getByPlaceholder("user")).toBeVisible();
+  await expect(page.getByPlaceholder("password")).toBeVisible();
+});
+
+test("login redirects to board on success", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByPlaceholder("user").fill("user");
+  await page.getByPlaceholder("password").fill("password");
+  await page.getByRole("button", { name: /sign in/i }).click();
+  await expect(page.locator('[data-testid^="column-"]')).toHaveCount(5);
+});
+
+test("login shows error on failure", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByPlaceholder("user").fill("wrong");
+  await page.getByPlaceholder("password").fill("wrong");
+  await page.getByRole("button", { name: /sign in/i }).click();
+  await expect(page.getByText("Invalid credentials")).toBeVisible();
+});
+
+test("theme toggle persists preference", async ({ page }) => {
+  await page.goto("/");
+  const toggle = page.getByRole("button", { name: /toggle theme/i });
+  await toggle.click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const stored = await page.evaluate(() => localStorage.getItem("theme"));
+  expect(stored).toBe("dark");
 });
