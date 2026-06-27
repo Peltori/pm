@@ -1,11 +1,11 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import clsx from "clsx";
-import type { Card } from "@/lib/kanban";
+import type { Card } from "@/lib/api";
 
 type KanbanCardProps = {
   card: Card;
-  onDelete: (cardId: string) => void;
+  onDelete: (cardId: number) => void;
 };
 
 export const KanbanCard = ({ card, onDelete }: KanbanCardProps) => {

@@ -12,9 +12,10 @@ class ColumnUpdate(BaseModel):
 
 
 class CardCreate(BaseModel):
+    column_id: int
     title: str
     details: str = ""
-    sort_order: int
+    sort_order: int = 0
 
 
 class CardUpdate(BaseModel):

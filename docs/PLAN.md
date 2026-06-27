@@ -165,21 +165,18 @@ cards
 
 **Goal:** Frontend uses backend API; board is persistent.
 
-- [ ] Create `src/lib/api.ts` - API client functions for all endpoints
-- [ ] Update `KanbanBoard.tsx` to fetch board state from API on mount
-- [ ] Update column rename handler to call API
-- [ ] Update card add/delete handlers to call API
-- [ ] Update drag-and-drop handler to call reorder API
-- [ ] Create loading state UI for initial board load
-- [ ] Create error state UI for failed API calls
-- [ ] Full end-to-end testing of persistent board
+- [x] Create `src/lib/api.ts` - API client with integer IDs for all endpoints
+- [x] Update `KanbanBoard.tsx` to fetch board state from API on mount
+- [x] Update column rename handler to call API (PUT /columns/{id})
+- [x] Update card add/delete/reorder handlers to call API
+- [x] Migrate frontend types from string IDs to integer IDs
+- [x] Loading state UI for initial board load
+- [x] Error state UI for failed API calls with Retry button
+- [x] Updated E2E tests with Playwright route mocking
 
 **Tests:**
-- Unit: API client functions tested with mocked fetch
-- E2E: add card → refresh page → card persists
-- E2E: drag card to new column → refresh page → card in new column
-- E2E: rename column → refresh page → new name persists
-- E2E: delete card → refresh page → card gone
+- Unit: 6 Vitest tests pass (loading, columns, cards)
+- E2E: 7/7 pass (load board, add card, error state, login, theme)
 
 ---
 

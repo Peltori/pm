@@ -34,7 +34,9 @@ def _ensure_board(db: Session) -> Board:
     return board
 
 
-def _board_response(db: Session, board: Board) -> dict:
+def _board_response(db: Session, board: Board | None) -> dict:
+    if not board:
+        return {"id": None, "columns": []}
     return {
         "id": board.id,
         "user_id": board.user_id,
@@ -60,6 +62,12 @@ def _board_response(db: Session, board: Board) -> dict:
             for c in sorted(board.columns, key=lambda x: x.sort_order)
         ],
     }
+
+
+@router.get("/boards", response_model=dict)
+def get_boards(db: Session = Depends(get_db)):
+    board = db.query(Board).order_by(Board.id.desc()).first()
+    return _board_response(db, board)
 
 
 @router.get("/boards/{board_id}", response_model=dict)
@@ -123,10 +131,10 @@ def add_card_to_board(
     board = get_board_with_cards(db, board_id)
     if not board:
         raise HTTPException(status_code=404, detail="Board not found")
-    column = db.query(Column).filter(Column.id == payload.sort_order).first()
+    column = db.query(Column).filter(Column.id == payload.column_id).first()
     if not column:
         raise HTTPException(status_code=404, detail="Column not found")
-    card = add_card(db, column.id, payload.title, payload.details, payload.sort_order)
+    card = add_card(db, column.id, payload.title, payload.details)
     return {
         "id": card.id,
         "column_id": card.column_id,
