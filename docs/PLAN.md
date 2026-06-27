@@ -9,7 +9,7 @@
 | Backend     | Python FastAPI                      |
 | Package Mgr | pnpm (frontend), uv (backend)       |
 | Database    | SQLite (normalized tables)          |
-| AI          | OpenRouter (`google/gemma-4-birdy-26b-a4b:free`) |
+| AI          | OpenRouter (`google/gemma-4-26b-a4b-it:free`) |
 | Auth        | Session-based (server-side sessions) |
 | Container   | Docker + docker-compose             |
 | Unit Tests  | Vitest + @testing-library/react     |
@@ -186,7 +186,7 @@ cards
 
 - [x] Create `backend/services/ai.py` - OpenRouter client (lazy initialization)
 - [x] Read `OPENROUTER_API_KEY` from project root `.env` (loaded via `python-dotenv`)
-- [x] Implement basic chat completion call using `google/gemma-4-birdy-26b-a4b:free`
+- [x] Implement basic chat completion call using `google/gemma-4-26b-a4b-it:free`
 - [x] Test with "2+2" question, verify response is "4"
 - [x] Test structured outputs: send a prompt with JSON schema, verify response conforms
 - [x] Consolidated single `.env` file at project root (removed duplicate `backend/.env`)
