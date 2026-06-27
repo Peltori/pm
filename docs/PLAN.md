@@ -207,38 +207,19 @@ cards
 
 **Goal:** AI receives board JSON + user message + conversation history; responds with answer + optional board updates.
 
-- [ ] Design prompt template that includes:
-  - System prompt explaining the AI's role (assistant that can update Kanban)
-  - Current board state (JSON)
-  - User message
-  - Conversation history
-- [ ] Define JSON schema for structured output:
-  ```json
-  {
-    "type": "object",
-    "properties": {
-      "response": { "type": "string" },
-      "board_update": {
-        "type": "object",
-        "properties": {
-          "add_cards": { "type": "array", "items": { "type": "object", "properties": { "column_id": {"type": "string"}, "title": {"type": "string"}, "details": {"type": "string"} } } },
-          "move_cards": { "type": "array", "items": { "type": "object", "properties": { "card_id": {"type": "string"}, "from_column_id": {"type": "string"}, "to_column_id": {"type": "string"}, "position": {"type": "integer"} } } },
-          "delete_cards": { "type": "array", "items": { "type": "string" } }
-        }
-      }
-    }
-  }
-  ```
-- [ ] Create `POST /api/ai/chat` endpoint
-- [ ] Parse and apply board_update to database
-- [ ] Return response text + applied updates
+- [x] Design prompt template with system prompt, board state JSON, user message, and conversation history
+- [x] Define JSON schema for structured output (response + board_update with add_cards, move_cards, delete_cards)
+- [x] Create `POST /api/ai/chat` endpoint
+- [x] Parse and apply board_update to database (add, move, delete cards)
+- [x] Return response text + applied updates
+- [x] Conversation history stored per user_id (in-memory for MVP)
 
 **Tests:**
 - Unit: prompt builder includes all required context
 - Unit: structured output parser correctly extracts response and updates
 - Unit: board_update is correctly applied to database
 - Integration: full chat flow with board update end-to-end
-- Integration: "move card X to column Y" produces correct API calls
+- Integration: chat history accumulates per user
 
 ---
 
