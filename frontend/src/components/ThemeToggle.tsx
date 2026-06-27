@@ -13,7 +13,9 @@ export function ThemeToggle() {
   const [theme, setTheme] = useState(getInitialTheme);
 
   const applyTheme = (t: string) => {
-    document.documentElement.setAttribute("data-theme", t);
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-theme", t);
+    }
   };
 
   applyTheme(theme);

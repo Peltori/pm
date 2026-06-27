@@ -7,6 +7,8 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  type Collision,
+  type CollisionDescriptor,
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
@@ -33,76 +35,99 @@ function toColumn(column: ApiColumn): ApiColumn {
   return { ...column, cards: [...column.cards].sort((a, b) => a.sort_order - b.sort_order) };
 }
 
+// Module-level ref to column IDs (updated each render for collision detection)
+const columnIdsRef = new Set<string>();
+
+function registerColumnIds(ids: Set<string>) {
+  columnIdsRef.clear();
+  ids.forEach((id) => columnIdsRef.add(id));
+}
+
 // Collision detection: find which column the pointer is in, then which card (if any)
-function pointerBasedCollision(
-  rects: { id: string | number; rect: DOMRect }[],
-  pointerX: number,
-  pointerY: number
-): { id: string | number; distance: number }[] {
-  let matchedId: string | number | null = null;
-  let minDistance = Infinity;
+// Uses rect data from args — never accesses document
+function pointerBasedCollision(args: {
+  active: { id: string | number; data?: any };
+  collisionRect: { left: number; top: number; width: number; height: number };
+  droppableRects: Map<string | number, { left: number; top: number; width: number; height: number }>;
+  droppableContainers: Array<{ id: string | number; disabled: boolean }>;
+  pointerCoordinates: { x: number; y: number } | null;
+}): Collision[] {
+  const pointer = args.pointerCoordinates;
+  if (!pointer) return [];
 
-  // First pass: find columns that contain the pointer horizontally
-  for (const item of rects) {
-    const el = document.querySelector(`[data-testid="${item.id}"]`);
-    if (!el) continue;
-    const box = (el as HTMLElement).getBoundingClientRect();
+  // Separate columns from cards using columnIdsRef
+  interface RectItem { id: string | number; rect: { left: number; top: number; width: number; height: number } }
+  const columns: RectItem[] = [];
+  const cards: RectItem[] = [];
 
-    // Check if pointer is within the element's bounds
-    if (pointerX >= box.left && pointerX <= box.right && pointerY >= box.top && pointerY <= box.bottom) {
-      // Calculate distance from pointer center to element center
-      const centerX = box.left + box.width / 2;
-      const centerY = box.top + box.height / 2;
-      const distance = Math.sqrt((pointerX - centerX) ** 2 + (pointerY - centerY) ** 2);
+  for (const container of args.droppableContainers) {
+    const rect = args.droppableRects.get(container.id);
+    if (!rect) continue;
+    const idStr = String(container.id);
+    if (columnIdsRef.has(idStr)) {
+      columns.push({ id: container.id, rect });
+    } else {
+      cards.push({ id: container.id, rect });
+    }
+  }
 
-      // Columns (id matches column.id from API) have a "column-" prefix in data-testid
-      const isColumn = String(item.id).startsWith("column-") || rects.some(r => r.id === item.id && !rects.some(c => c.id === item.id && String(c.id).includes("card")));
+  if (columns.length === 0 && cards.length === 0) {
+    return [];
+  }
 
-      if (isColumn || !matchedId) {
-        if (distance < minDistance) {
-          minDistance = distance;
-          matchedId = item.id;
+  // For number-only IDs, use a heuristic: cards have the active card's rect as collisionRect
+  // Columns are wider and taller. We'll use the active card's position to determine
+  // which column the pointer is in.
+  let matchedColumnId: string | number | null = null;
+  let minColDistance = Infinity;
+
+  for (const col of columns) {
+    // Check if pointer is horizontally within this column
+    if (pointer.x >= col.rect.left && pointer.x <= col.rect.left + col.rect.width) {
+      const centerY = col.rect.top + col.rect.height / 2;
+      const distance = Math.abs(pointer.y - centerY);
+      if (distance < minColDistance) {
+        minColDistance = distance;
+        matchedColumnId = col.id;
+      }
+    }
+  }
+
+  // Also check if pointer is within the collision rect's horizontal bounds
+  if (!matchedColumnId) {
+    for (const col of columns) {
+      if (
+        args.collisionRect.left + args.collisionRect.width >= col.rect.left &&
+        args.collisionRect.left <= col.rect.left + col.rect.width
+      ) {
+        const centerY = col.rect.top + col.rect.height / 2;
+        const distance = Math.abs(
+          args.collisionRect.top + args.collisionRect.height / 2 - centerY
+        );
+        if (distance < minColDistance) {
+          minColDistance = distance;
+          matchedColumnId = col.id;
         }
       }
     }
   }
 
-  if (matchedId) {
-    return [{ id: matchedId, distance: minDistance }];
-  }
+  if (!matchedColumnId) return [];
 
-  // Fallback: check which column the pointer is horizontally closest to
-  const columnRects = rects.filter((r) => {
-    const el = document.querySelector(`[data-testid="column-${r.id}"]`);
-    return el !== null;
-  });
-
-  for (const rect of columnRects) {
-    const el = document.querySelector(`[data-testid="column-${rect.id}"]`) as HTMLElement;
-    if (!el) continue;
-    const box = el.getBoundingClientRect();
-    if (pointerX >= box.left && pointerX <= box.right) {
-      // Find closest card top within this column
-      const cardRects = rects.filter((r) => {
-        const cardEl = document.querySelector(`[data-testid="card-${r.id}"]`);
-        return cardEl !== null && cardEl.parentElement?.closest(`[data-testid="column-${rect.id}"]`) !== null;
-      });
-
-      for (const cardRect of cardRects) {
-        const cardEl = document.querySelector(`[data-testid="card-${cardRect.id}"]`) as HTMLElement;
-        if (!cardEl) continue;
-        const cardBox = cardEl.getBoundingClientRect();
-        if (pointerY >= cardBox.top && pointerY <= cardBox.bottom) {
-          return [{ id: cardRect.id, distance: 0 }];
-        }
-      }
-
-      // Over column background
-      return [{ id: rect.id, distance: 0 }];
+  // Second pass: check if pointer is over a specific card in the matched column
+  for (const card of cards) {
+    if (
+      pointer.x >= card.rect.left &&
+      pointer.x <= card.rect.left + card.rect.width &&
+      pointer.y >= card.rect.top &&
+      pointer.y <= card.rect.top + card.rect.height
+    ) {
+      return [{ id: card.id }];
     }
   }
 
-  return [];
+  // Pointer is over the column background
+  return [{ id: matchedColumnId }];
 }
 
 export const KanbanBoard = () => {
@@ -118,6 +143,13 @@ export const KanbanBoard = () => {
   const columnsRef = useRef<ApiColumn[]>([]);
   useEffect(() => {
     columnsRef.current = state.columns;
+  }, [state.columns]);
+
+  // Column IDs for collision detection
+  const columnIds = useMemo(() => {
+    const ids = new Set(state.columns.map((c) => String(c.id)));
+    registerColumnIds(ids);
+    return ids;
   }, [state.columns]);
 
   const sensors = useSensors(
