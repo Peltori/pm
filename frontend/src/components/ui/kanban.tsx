@@ -115,6 +115,15 @@ export interface KanbanMoveEvent {
   overIndex: number
 }
 
+// Prefix used for column keys to disambiguate from item IDs in isColumn check.
+// Without this, when a card ID collides with a column ID (e.g. both are "1"),
+// isColumn() would incorrectly classify the card as a column.
+const COL_PREFIX = "col-"
+
+function colKey(id: string | number): string {
+  return `${COL_PREFIX}${id}`
+}
+
 export interface KanbanRootProps<T> extends HTMLAttributes<HTMLDivElement> {
   value: Record<string, T[]>
   onValueChange: (value: Record<string, T[]>) => void
@@ -161,7 +170,12 @@ function Kanban<T>({
 
   const columnIds = useMemo(() => Object.keys(columns), [columns])
 
-  const isColumn = useCallback((id: UniqueIdentifier) => columnIds.includes(id as string), [columnIds])
+  // A value is a column if it starts with COL_PREFIX. Items use raw IDs.
+  // This disambiguates when card and column IDs collide (e.g. both are "1").
+  const isColumn = useCallback((id: UniqueIdentifier) => {
+    const s = String(id)
+    return s.startsWith(COL_PREFIX)
+  }, [])
 
   // findContainer reads columnsRef so it doesn't need columns or getItemValue in its deps.
   const findContainer = useCallback(
