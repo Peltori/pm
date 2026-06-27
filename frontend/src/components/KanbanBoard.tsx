@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
   PointerSensor,
   useSensor,
   useSensors,
-  closestCorners,
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
@@ -34,6 +33,78 @@ function toColumn(column: ApiColumn): ApiColumn {
   return { ...column, cards: [...column.cards].sort((a, b) => a.sort_order - b.sort_order) };
 }
 
+// Collision detection: find which column the pointer is in, then which card (if any)
+function pointerBasedCollision(
+  rects: { id: string | number; rect: DOMRect }[],
+  pointerX: number,
+  pointerY: number
+): { id: string | number; distance: number }[] {
+  let matchedId: string | number | null = null;
+  let minDistance = Infinity;
+
+  // First pass: find columns that contain the pointer horizontally
+  for (const item of rects) {
+    const el = document.querySelector(`[data-testid="${item.id}"]`);
+    if (!el) continue;
+    const box = (el as HTMLElement).getBoundingClientRect();
+
+    // Check if pointer is within the element's bounds
+    if (pointerX >= box.left && pointerX <= box.right && pointerY >= box.top && pointerY <= box.bottom) {
+      // Calculate distance from pointer center to element center
+      const centerX = box.left + box.width / 2;
+      const centerY = box.top + box.height / 2;
+      const distance = Math.sqrt((pointerX - centerX) ** 2 + (pointerY - centerY) ** 2);
+
+      // Columns (id matches column.id from API) have a "column-" prefix in data-testid
+      const isColumn = String(item.id).startsWith("column-") || rects.some(r => r.id === item.id && !rects.some(c => c.id === item.id && String(c.id).includes("card")));
+
+      if (isColumn || !matchedId) {
+        if (distance < minDistance) {
+          minDistance = distance;
+          matchedId = item.id;
+        }
+      }
+    }
+  }
+
+  if (matchedId) {
+    return [{ id: matchedId, distance: minDistance }];
+  }
+
+  // Fallback: check which column the pointer is horizontally closest to
+  const columnRects = rects.filter((r) => {
+    const el = document.querySelector(`[data-testid="column-${r.id}"]`);
+    return el !== null;
+  });
+
+  for (const rect of columnRects) {
+    const el = document.querySelector(`[data-testid="column-${rect.id}"]`) as HTMLElement;
+    if (!el) continue;
+    const box = el.getBoundingClientRect();
+    if (pointerX >= box.left && pointerX <= box.right) {
+      // Find closest card top within this column
+      const cardRects = rects.filter((r) => {
+        const cardEl = document.querySelector(`[data-testid="card-${r.id}"]`);
+        return cardEl !== null && cardEl.parentElement?.closest(`[data-testid="column-${rect.id}"]`) !== null;
+      });
+
+      for (const cardRect of cardRects) {
+        const cardEl = document.querySelector(`[data-testid="card-${cardRect.id}"]`) as HTMLElement;
+        if (!cardEl) continue;
+        const cardBox = cardEl.getBoundingClientRect();
+        if (pointerY >= cardBox.top && pointerY <= cardBox.bottom) {
+          return [{ id: cardRect.id, distance: 0 }];
+        }
+      }
+
+      // Over column background
+      return [{ id: rect.id, distance: 0 }];
+    }
+  }
+
+  return [];
+}
+
 export const KanbanBoard = () => {
   const [state, setState] = useState<BoardState>({
     boardId: 0,
@@ -42,6 +113,12 @@ export const KanbanBoard = () => {
     error: null,
   });
   const [activeCardId, setActiveCardId] = useState<number | null>(null);
+
+  // Keep a ref to columns for collision detection (avoids stale closure)
+  const columnsRef = useRef<ApiColumn[]>([]);
+  useEffect(() => {
+    columnsRef.current = state.columns;
+  }, [state.columns]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
@@ -91,23 +168,22 @@ export const KanbanBoard = () => {
     if (!over || active.id === over.id || state.boardId === 0) return;
 
     const activeId = Number(active.id);
-    const activeCard = state.columns.flatMap((c) => c.cards).find((c) => c.id === activeId);
+    const activeCard = columnsRef.current.flatMap((c) => c.cards).find((c) => c.id === activeId);
     if (!activeCard) return;
 
     // Find the over column/card
     let targetColumnId: number | null = null;
     let targetOrder: number | null = null;
 
-    if (state.columns.some((c) => c.id === Number(over.id))) {
+    if (columnsRef.current.some((c) => c.id === Number(over.id))) {
       // Dropped on a column (new card)
       targetColumnId = Number(over.id);
-      targetOrder = state.columns
+      targetOrder = columnsRef.current
         .find((c) => c.id === targetColumnId)!
         .cards.length;
     } else {
       // Dropped on a card
-      targetColumnId = activeCard.column_id;
-      for (const col of state.columns) {
+      for (const col of columnsRef.current) {
         const overCard = col.cards.find((c) => c.id === Number(over.id));
         if (overCard) {
           targetColumnId = col.id;
@@ -198,11 +274,11 @@ export const KanbanBoard = () => {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={pointerBasedCollision}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <section className="grid gap-6 lg:grid-cols-5">
+      <section className="flex flex-1 gap-6 overflow-x-auto pb-2">
         {state.columns.map((column) => (
           <KanbanColumn
             key={column.id}
