@@ -63,7 +63,7 @@ export const KanbanBoard = () => {
       if (!board.id) return;
       setState((prev) => ({
         ...prev,
-        boardId: board.id,
+        boardId: board.id ?? prev.boardId,
         columns: board.columns.map(toColumn),
         loading: false,
         error: null,

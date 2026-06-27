@@ -28,3 +28,13 @@ class ReorderRequest(BaseModel):
     card_id: int
     to_column_id: int | None = None
     new_order: int | None = None
+
+
+class ChatRequest(BaseModel):
+    message: str
+    user_id: str = "default"
+
+
+class ChatResponse(BaseModel):
+    response: str
+    board_update: dict | None = None

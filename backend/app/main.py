@@ -4,7 +4,14 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
-load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
+# Try multiple .env locations
+for candidate in [
+    Path(__file__).resolve().parent.parent.parent / ".env",
+    Path(__file__).resolve().parent.parent.parent.parent / ".env",
+]:
+    if candidate.exists():
+        load_dotenv(str(candidate))
+        break
 from fastapi.middleware.cors import CORSMiddleware
 
 from .ai_routes import router as ai_router
