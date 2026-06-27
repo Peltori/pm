@@ -22,6 +22,9 @@ import {
 import { NewCardForm } from '@/components/NewCardForm';
 import { KanbanCardPreview } from '@/components/KanbanCardPreview';
 
+// Prefix for column keys to disambiguate from card IDs when they collide.
+const colKey = (id: number | string): string => `col-${id}`;
+
 type BoardState = {
   boardId: number;
   columns: ApiColumn[];
@@ -39,7 +42,7 @@ function toColumn(column: ApiColumn): ApiColumn {
 /** Convert API board state to kanban-friendly format */
 function toKanbanData(columns: ApiColumn[]) {
   return Object.fromEntries(
-    columns.map((col) => [String(col.id), col.cards])
+    columns.map((col) => [colKey(col.id), col.cards])
   ) as Record<string, ApiCard[]>;
 }
 
@@ -141,8 +144,9 @@ export function KanbanBoard() {
       if (state.boardId === 0) return;
 
       const { activeContainer, activeIndex, overContainer, overIndex } = event;
-      const activeColumnId = parseInt(activeContainer, 10);
-      const overColumnId = parseInt(overContainer, 10);
+      // Strip "col-" prefix added by Kanban for ID disambiguation.
+      const activeColumnId = parseInt(activeContainer.replace(/^col-/, ''), 10);
+      const overColumnId = parseInt(overContainer.replace(/^col-/, ''), 10);
 
       // Find the card being moved
       const sourceCards = state.columns.find(
@@ -215,7 +219,7 @@ export function KanbanBoard() {
         {state.columns.map((column) => (
           <KanbanColumn
             key={column.id}
-            value={String(column.id)}
+            value={colKey(column.id)}
             className="w-[320px] flex-shrink-0"
           >
             <section
@@ -240,7 +244,7 @@ export function KanbanBoard() {
                   />
                 </div>
               </div>
-              <KanbanColumnContent value={String(column.id)}>
+              <KanbanColumnContent value={colKey(column.id)}>
                 {column.cards.map((card) => (
                   <KanbanItem
                     key={card.id}
@@ -280,11 +284,12 @@ export function KanbanBoard() {
           const stringValue = String(value);
 
           if (variant === 'column') {
-            // Overlay for dragging a column
+            // Overlay for dragging a column (value is prefixed with "col-")
+            const colId = parseInt(stringValue.replace(/^col-/, ''), 10);
             return (
               <section
                 className="flex w-[320px] flex-col rounded-3xl border border-[var(--stroke)] bg-[var(--surface-strong)] p-4 opacity-50"
-                data-testid={`column-${stringValue}`}
+                data-testid={`column-${colId}`}
               >
                 <div className="flex items-center gap-3">
                   <div className="h-2 w-10 rounded-full bg-[var(--accent-yellow)]" />
