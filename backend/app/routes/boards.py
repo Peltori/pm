@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..database import SessionLocal, Board, Column, Card
+from ..database import Board, Column, Card, get_db
 from ..schemas import ColumnCreate, ColumnUpdate, CardCreate, CardUpdate, ReorderRequest
 from ..services.board_service import (
     get_or_create_board,
@@ -14,14 +14,6 @@ from ..services.board_service import (
     delete_card,
     reorder_card,
 )
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 router = APIRouter()

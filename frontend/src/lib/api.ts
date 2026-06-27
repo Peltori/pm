@@ -29,7 +29,7 @@ async function fetchApi(url: string, options?: RequestInit): Promise<unknown> {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || `API error ${res.status}`);
+    throw new Error(err.detail || `API error ${res.status} on ${url}`);
   }
   return res.json();
 }
