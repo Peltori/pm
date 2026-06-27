@@ -16,7 +16,7 @@ import { KanbanCardPreview } from "@/components/KanbanCardPreview";
 import {
   getBoard,
   addCard as apiAddCard,
-  updateCard as apiUpdateCard,
+  updateColumn as apiUpdateColumn,
   deleteCard as apiDeleteCard,
   reorderCard as apiReorderCard,
   type Card as ApiCard,
@@ -161,7 +161,7 @@ export const KanbanBoard = () => {
     const column = state.columns.find((c) => c.id === columnId);
     if (!column) return;
     try {
-      await apiUpdateCard(state.boardId, columnId, title, undefined, column.sort_order);
+      await apiUpdateColumn(state.boardId, columnId, title, column.sort_order);
       refreshBoard();
     } catch (err) {
       setState((prev) => ({

@@ -2,8 +2,21 @@ from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.database import get_db as get_db_shared
 
 client = TestClient(app)
+
+
+def override_get_db():
+    from app.database import engine, SessionLocal
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+app.dependency_overrides[get_db_shared] = override_get_db
 
 
 def test_ai_test_endpoint():

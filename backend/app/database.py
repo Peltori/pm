@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from datetime import datetime, timezone
 
+import bcrypt
 from sqlalchemy import Column as SQLAlchemyColumn
 from sqlalchemy import ForeignKey, Integer, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, relationship, sessionmaker
@@ -10,6 +12,33 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, relationship, sessionmaker
 DB_PATH = os.environ.get("DATABASE_URL", "sqlite:///kanban.db")
 engine = create_engine(DB_PATH, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine)
+
+
+def load_env_file():
+    """Load .env from one of several candidate locations."""
+    candidates = [
+        Path(__file__).resolve().parent.parent.parent.parent / ".env",
+        Path(__file__).resolve().parent.parent.parent / ".env",
+        Path(__file__).resolve().parent.parent.parent.parent.parent / ".env",
+    ]
+    for env_path in candidates:
+        if env_path.exists():
+            from dotenv import load_dotenv
+            load_dotenv(str(env_path))
+            break
+
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+def get_db():
+    """Shared database session generator for FastAPI routes."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 class Base(DeclarativeBase):
@@ -71,7 +100,7 @@ def seed():
     if SessionLocal().query(User).first():
         return
     now = datetime.now(timezone.utc).isoformat()
-    user = User(username="user", password_hash="password")
+    user = User(username="user", password_hash=hash_password("password"))
     board = Board(created_at=now, updated_at=now)
     columns_data = [
         ("Backlog", 0),

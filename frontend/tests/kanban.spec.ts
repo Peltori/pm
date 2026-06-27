@@ -17,7 +17,7 @@ let boardWithE2ECard: ReturnType<typeof createBoard>;
 
 test.use({
   storageState: {
-    cookies: [{ name: "session", value: "authenticated", domain: "127.0.0.1", path: "/", sameSite: "Strict" }],
+    cookies: [{ name: "session", value: "authenticated", domain: "127.0.0.1", path: "/", sameSite: "Strict", httpOnly: false, secure: false, expires: -1 }],
   },
 });
 

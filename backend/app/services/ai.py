@@ -11,6 +11,8 @@ from openai import AsyncOpenAI
 _client: AsyncOpenAI | None = None
 
 # Simple in-memory conversation history store (keyed by user identifier for MVP)
+# Cap at 10 exchanges (20 messages) to avoid token limit issues
+_MAX_HISTORY = 20
 _conversation_history: dict[str, list[dict]] = {}
 
 
@@ -178,12 +180,18 @@ async def chat(board: dict, user_message: str, history: list[dict] | None = None
     )
 
     content = response.choices[0].message.content or "{}"
-    result = json.loads(content)
+    try:
+        result = json.loads(content)
+    except json.JSONDecodeError:
+        result = {"response": "I received an unexpected response. Please try again."}
 
     # Store this exchange in history (system message is implicit, only user+assistant)
     if user_id not in _conversation_history:
         _conversation_history[user_id] = []
     _conversation_history[user_id].append({"role": "user", "content": user_message})
     _conversation_history[user_id].append({"role": "assistant", "content": result.get("response", "")})
+    # Cap history to last N messages
+    if len(_conversation_history[user_id]) > _MAX_HISTORY:
+        _conversation_history[user_id] = _conversation_history[user_id][-_MAX_HISTORY:]
 
     return result

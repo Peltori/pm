@@ -1,16 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
-from app.database import Base, User, Board, Column, Card
+from app.database import Base, User, Board, Column, Card, get_db
 from app.main import app
-from app.routes.boards import get_db
-
-
-TEST_DB_URL = "sqlite:///test_kanban.db"
-engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
-TestingSessionLocal = sessionmaker(bind=engine)
+from .conftest import TestingSessionLocal
 
 
 def override_get_db():
@@ -24,22 +17,13 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 
-@pytest.fixture(autouse=True)
-def setup_db():
-    Base.metadata.create_all(bind=engine)
-    yield
-    Base.metadata.drop_all(bind=engine)
-
-
 @pytest.fixture
 def client():
     return TestClient(app)
 
 
 def _create_test_data(db):
-    user = User(username="user", password_hash="password")
-    db.add(user)
-    db.flush()
+    user = db.query(User).first()
     board = Board(user_id=user.id, created_at="2024-01-01T00:00:00Z", updated_at="2024-01-01T00:00:00Z")
     db.add(board)
     db.flush()
@@ -219,8 +203,8 @@ def test_reorder_card_different_column(client):
     db = TestingSessionLocal()
     board = _create_test_data(db)
     board_id = board.id
-    col1 = db.query(Column).filter(Column.title == "Backlog").first()
-    col2 = db.query(Column).filter(Column.title == "In Progress").first()
+    col1 = db.query(Column).filter(Column.board_id == board.id, Column.title == "Backlog").first()
+    col2 = db.query(Column).filter(Column.board_id == board.id, Column.title == "In Progress").first()
     card = db.query(Card).filter(Card.column_id == col1.id).first()
     card_id = card.id
     col2_id = col2.id

@@ -1,20 +1,16 @@
+import logging
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from .database import SessionLocal, Board, Column, Card
+from .database import SessionLocal, Board, Column, Card, get_db
 from .schemas import ChatRequest, ChatResponse
 from .services.ai import chat, test_ai, test_structured_output, _conversation_history
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 def _get_board_for_ai(db: Session) -> dict:
@@ -85,6 +81,7 @@ async def ai_chat(payload: ChatRequest, db: Session = Depends(get_db)):
                     continue
                 column = db.query(Column).filter(Column.id == col_id).first()
                 if not column:
+                    logger.warning("AI requested add to non-existent column %s", col_id)
                     continue
                 sort_order = column.cards[-1].sort_order + 1 if column.cards else 0
                 card = Card(column_id=col_id, title=title, details=details, sort_order=sort_order)
@@ -100,23 +97,27 @@ async def ai_chat(payload: ChatRequest, db: Session = Depends(get_db)):
                 if card_id is None or to_column_id is None:
                     continue
                 card = db.query(Card).filter(Card.id == card_id).first()
-                column = db.query(Column).filter(Column.id == to_column_id).first()
-                if not card or not column:
+                to_column = db.query(Column).filter(Column.id == to_column_id).first()
+                if not card or not to_column:
+                    logger.warning("AI requested move of non-existent card %s or column %s", card_id, to_column_id)
                     continue
                 if to_column_id != card.column_id:
                     # Remove card from old column's order
+                    old_column_id = card.column_id
                     other_cards = (
                         db.query(Card)
-                        .filter(Card.column_id == card.column_id, Card.id != card_id)
+                        .filter(Card.column_id == old_column_id, Card.id != card_id)
                         .order_by(Card.sort_order)
                         .all()
                     )
                     card.column_id = to_column_id
+                    card.sort_order = position if position is not None else 0
                     # Re-sort old column
                     for i, c in enumerate(other_cards):
                         c.sort_order = i
-                if position is not None:
-                    card.sort_order = position
+                else:
+                    if position is not None:
+                        card.sort_order = position
                 db.flush()
 
         # Delete cards
