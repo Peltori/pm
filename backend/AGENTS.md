@@ -9,7 +9,7 @@ backend/
   app/
     __init__.py
     main.py          # FastAPI app entry, health + static file serving
-    ai.py            # OpenRouter client (poolside/laguna-xs.2:free)
+    ai.py            # OpenRouter client (google/gemma-4-birdy-26b-a4b:free)
     ai_routes.py     # /api/ai/test endpoint
     database/        # (Part 5+) SQLAlchemy models, sessions
     routes/          # (Part 6+) API route handlers
@@ -28,7 +28,7 @@ backend/
 - Python 3.12+
 - FastAPI + uvicorn
 - SQLite (async, via aiosqlite + SQLAlchemy)
-- OpenRouter AI (poolside/laguna-xs.2:free)
+- OpenRouter AI (google/gemma-4-birdy-26b-a4b:free)
 - pytest + httpx for testing
 - uv for package management
 
