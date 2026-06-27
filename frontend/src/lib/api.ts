@@ -88,3 +88,26 @@ export async function reorderCard(boardId: number, cardId: number, toColumnId: n
     body: JSON.stringify({ card_id: cardId, to_column_id: toColumnId, new_order: newOrder }),
   }) as Promise<Card>;
 }
+
+export type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+export type BoardUpdate = {
+  add_cards?: Array<{ column_id: number; title: string; details?: string }>;
+  move_cards?: Array<{ card_id: number; to_column_id: number; position?: number }>;
+  delete_cards?: number[];
+};
+
+export type AIChatResponse = {
+  response: string;
+  board_update: BoardUpdate | null;
+};
+
+export async function aiChat(message: string, userId: string = "default"): Promise<AIChatResponse> {
+  return fetchApi(`${API_BASE}/ai/chat`, {
+    method: "POST",
+    body: JSON.stringify({ message, user_id: userId }),
+  }) as Promise<AIChatResponse>;
+}
