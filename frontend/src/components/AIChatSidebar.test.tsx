@@ -1,11 +1,10 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AIChatSidebar } from "./AIChatSidebar";
-import { aiChat } from "@/lib/api";
+import * as apiModule from "@/lib/api";
 
-vi.mock("@/lib/api", () => ({
-  aiChat: vi.fn(),
-}));
+vi.mock("@/lib/api");
 
+const mockAiChat = apiModule.aiChat as ReturnType<typeof vi.fn>;
 const mockOnBoardUpdate = vi.fn();
 const mockOnClose = vi.fn();
 
@@ -40,7 +39,6 @@ describe("AIChatSidebar", () => {
   });
 
   it("sends message and displays AI response", async () => {
-    const { aiChat: mockAiChat } = await import("@/lib/api");
     mockAiChat.mockResolvedValue({
       response: "I've added the task to Backlog.",
       board_update: null,
@@ -67,7 +65,6 @@ describe("AIChatSidebar", () => {
   });
 
   it("shows loading indicator while waiting for response", async () => {
-    const { aiChat: mockAiChat } = await import("@/lib/api");
     const promise = new Promise((resolve) =>
       setTimeout(() =>
         resolve({
@@ -100,7 +97,6 @@ describe("AIChatSidebar", () => {
   });
 
   it("calls onBoardUpdate when board update is received", async () => {
-    const { aiChat: mockAiChat } = await import("@/lib/api");
     mockAiChat.mockResolvedValue({
       response: "Task added.",
       board_update: {
@@ -127,7 +123,6 @@ describe("AIChatSidebar", () => {
   });
 
   it("handles API errors gracefully", async () => {
-    const { aiChat: mockAiChat } = await import("@/lib/api");
     mockAiChat.mockRejectedValue(new Error("API Error"));
 
     render(
@@ -162,7 +157,6 @@ describe("AIChatSidebar", () => {
   });
 
   it("sends message on Enter key", async () => {
-    const { aiChat: mockAiChat } = await import("@/lib/api");
     mockAiChat.mockResolvedValue({
       response: "OK",
       board_update: null,

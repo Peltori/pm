@@ -1,26 +1,16 @@
 from contextlib import asynccontextmanager
-from pathlib import Path
 
-from dotenv import load_dotenv
 from fastapi import FastAPI
-
-# Try multiple .env locations
-for candidate in [
-    Path(__file__).resolve().parent.parent.parent / ".env",
-    Path(__file__).resolve().parent.parent.parent.parent / ".env",
-]:
-    if candidate.exists():
-        load_dotenv(str(candidate))
-        break
 from fastapi.middleware.cors import CORSMiddleware
 
 from .ai_routes import router as ai_router
 from .routes.boards import router as boards_router
-from .database import init_db, seed
+from .database import init_db, seed, load_env_file
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    load_env_file()
     init_db()
     seed()
     yield
@@ -33,7 +23,7 @@ app.include_router(ai_router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

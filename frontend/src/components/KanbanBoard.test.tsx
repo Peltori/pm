@@ -1,4 +1,4 @@
-import { screen, render, waitFor, fireEvent } from "@testing-library/react";
+import { screen, render, waitFor } from "@testing-library/react";
 import { KanbanBoard } from "./KanbanBoard";
 
 const mockBoard = {
