@@ -18,9 +18,15 @@ def _get_client() -> AsyncOpenAI:
     global _client
     if _client is None:
         if not os.getenv("OPENROUTER_API_KEY"):
-            env_path = Path(__file__).resolve().parent.parent.parent.parent / ".env"
-            if env_path.exists():
-                load_dotenv(str(env_path))
+            # Try multiple possible .env locations (local dev, docker, etc.)
+            candidates = [
+                Path(__file__).resolve().parent.parent.parent.parent / ".env",
+                Path(__file__).resolve().parent.parent.parent / ".env",
+            ]
+            for env_path in candidates:
+                if env_path.exists():
+                    load_dotenv(str(env_path))
+                    break
         _client = AsyncOpenAI(
             api_key=os.getenv("OPENROUTER_API_KEY"),
             base_url="https://openrouter.ai/api/v1",
