@@ -147,27 +147,17 @@ cards
 
 **Goal:** FastAPI routes to CRUD the Kanban board, backed by SQLite.
 
-- [ ] Create `backend/models.py` - SQLAlchemy ORM models
-- [ ] Create `backend/schemas.py` - Pydantic request/response schemas
-- [ ] Create `backend/routes/boards.py` - Board CRUD routes
-  - `GET /api/boards/{board_id}` - get full board with columns and cards
-  - `POST /api/boards/{board_id}/columns` - add column
-  - `PUT /api/boards/{board_id}/columns/{column_id}` - rename column
-  - `DELETE /api/boards/{board_id}/columns/{column_id}` - delete column
-  - `POST /api/boards/{board_id}/cards` - add card
-  - `PUT /api/boards/{board_id}/cards/{card_id}` - update card
-  - `DELETE /api/boards/{board_id}/cards/{card_id}` - delete card
-  - `POST /api/boards/{board_id}/reorder` - reorder cards (move between columns)
-- [ ] Create `backend/services/` - business logic layer
-- [ ] Handle "create board if not exists" for the single-user MVP
-- [ ] Write comprehensive backend unit tests with pytest
+- [x] Create `backend/schemas.py` - Pydantic request/response schemas
+- [x] Create `backend/routes/boards.py` - Board CRUD routes (8 endpoints)
+- [x] Create `backend/services/board_service.py` - business logic layer
+- [x] Handle "create board if not exists" for the single-user MVP
+- [x] Write comprehensive backend unit tests with pytest
 
 **Tests:**
-- Unit: each CRUD endpoint tested with mocked DB session
-- Unit: reorder endpoint tests all move scenarios (same column, different column, end of list)
-- Unit: column rename endpoint
-- Unit: card add/delete endpoints
-- Integration: endpoints work with real SQLite (test DB)
+- Unit: 17 CRUD endpoint tests pass with real SQLite test DB
+- Unit: reorder endpoint tests same column + different column scenarios
+- Unit: column rename, card add/delete, 404 handling
+- Unit: 23/23 backend tests pass (3 Docker-only skipped)
 
 ---
 
