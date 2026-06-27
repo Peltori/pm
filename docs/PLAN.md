@@ -184,16 +184,22 @@ cards
 
 **Goal:** Backend can make AI calls via OpenRouter.
 
-- [ ] Create `backend/services/ai.py` - OpenRouter client
-- [ ] Read `OPENROUTER_API_KEY` from `.env` (loaded via `python-dotenv`)
-- [ ] Implement basic chat completion call using `qwen/qwen3-coder:free`
-- [ ] Test with "2+2" question, verify response is "4"
-- [ ] Test structured outputs: send a prompt with JSON schema, verify response conforms
+- [x] Create `backend/services/ai.py` - OpenRouter client (lazy initialization)
+- [x] Read `OPENROUTER_API_KEY` from project root `.env` (loaded via `python-dotenv`)
+- [x] Implement basic chat completion call using `poolside/laguna-xs.2:free`
+- [x] Test with "2+2" question, verify response is "4"
+- [x] Test structured outputs: send a prompt with JSON schema, verify response conforms
+- [x] Consolidated single `.env` file at project root (removed duplicate `backend/.env`)
 
 **Tests:**
-- Unit: AI service returns valid response for simple prompt
-- Unit: AI service returns structured output matching schema
-- Integration: full call through FastAPI endpoint with "2+2" test
+- Unit: AI service returns valid response for simple prompt (2+2) ✅
+- Unit: AI service returns structured output matching schema ✅
+- Integration: full call through FastAPI endpoint with "2+2" test (`GET /api/ai/test`) ✅
+- Integration: structured output test endpoint (`GET /api/ai/test-structured`) ✅
+
+**Endpoints:**
+- `GET /api/ai/test` - simple 2+2 connectivity check
+- `GET /api/ai/test-structured` - structured JSON output verification
 
 ---
 
