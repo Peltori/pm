@@ -50,6 +50,8 @@ def delete_column(db: Session, column_id: int) -> bool:
 
 def add_card(db: Session, column_id: int, title: str, details: str) -> Card:
     column = db.query(Column).filter(Column.id == column_id).first()
+    if not column:
+        return None  # type: ignore
     sort_order = column.cards[-1].sort_order + 1 if column.cards else 0
     card = Card(column_id=column_id, title=title, details=details, sort_order=sort_order)
     db.add(card)

@@ -1,11 +1,24 @@
+import pytest
 from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.database import Card, Column, SessionLocal
-from app.services.ai import _conversation_history
+from app.database import Card, Column, get_db as get_db_shared
+from .conftest import TestingSessionLocal
 
 client = TestClient(app)
+
+
+def override_get_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+app.dependency_overrides[get_db_shared] = override_get_db
+
 
 MOCK_SIMPLE_RESPONSE = {"response": "I'm your AI assistant."}
 
@@ -47,7 +60,7 @@ def test_ai_chat_with_add_card():
     assert len(data["board_update"]["add_cards"]) > 0
 
     # Verify the card was actually added to the database
-    db = SessionLocal()
+    db = TestingSessionLocal()
     try:
         backlog = db.query(Column).filter(Column.title == "Backlog").first()
         assert backlog is not None
