@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir uv && \
     uv lock && uv sync --frozen --no-dev
 
 COPY backend/app/ ./app/
-COPY backend/.env ./
+COPY .env /app/backend/.env
 
 FROM python:3.12-slim
 
