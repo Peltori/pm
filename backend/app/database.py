@@ -116,15 +116,16 @@ def seed():
         "Review": [("QA micro-interactions", "Verify hover, focus, and loading states.")],
         "Done": [("Ship marketing page", "Final copy approved and asset pack delivered."), ("Close onboarding sprint", "Document release notes and share internally.")],
     }
+    db = SessionLocal()
+    db.add(user)
+    db.flush()
+    board.user = user
+    db.add(board)
+    db.flush()
     for col_title, col_order in columns_data:
         col = Column(board_id=board.id, title=col_title, sort_order=col_order)
         board.columns.append(col)
         for card_title, card_details in cards_data[col_title]:
             card = Card(column_id=col.id, title=card_title, details=card_details, sort_order=0)
             col.cards.append(card)
-    db = SessionLocal()
-    db.add(user)
-    db.flush()
-    board.user = user
-    db.add(board)
     db.commit()
