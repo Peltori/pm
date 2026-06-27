@@ -187,3 +187,4 @@ frontend/test-results/
 
 
 backend/kanban.db
+backend/test_kanban.db
