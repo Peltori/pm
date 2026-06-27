@@ -146,13 +146,13 @@ def test_add_card(client):
     col_id = col.id
     db.close()
 
-    r = client.post(f"/api/boards/{board_id}/cards", json={"title": "New Card", "details": "New details", "sort_order": col_id})
+    r = client.post(f"/api/boards/{board_id}/cards", json={"column_id": col_id, "title": "New Card"})
     assert r.status_code == 200
     assert r.json()["title"] == "New Card"
 
 
 def test_add_card_board_not_found(client):
-    r = client.post("/api/boards/999/cards", json={"title": "New Card", "details": "New details", "sort_order": 1})
+    r = client.post("/api/boards/999/cards", json={"column_id": 1, "title": "New Card"})
     assert r.status_code == 404
 
 

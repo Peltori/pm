@@ -48,7 +48,9 @@ def delete_column(db: Session, column_id: int) -> bool:
     return True
 
 
-def add_card(db: Session, column_id: int, title: str, details: str, sort_order: int) -> Card:
+def add_card(db: Session, column_id: int, title: str, details: str) -> Card:
+    column = db.query(Column).filter(Column.id == column_id).first()
+    sort_order = column.cards[-1].sort_order + 1 if column.cards else 0
     card = Card(column_id=column_id, title=title, details=details, sort_order=sort_order)
     db.add(card)
     db.commit()
@@ -85,9 +87,7 @@ def reorder_card(db: Session, card_id: int, to_column_id: int | None, new_order:
     if not card:
         return None
 
-    old_column_id = card.column_id
-
-    if to_column_id is not None and to_column_id != old_column_id:
+    if to_column_id is not None and to_column_id != card.column_id:
         card.column_id = to_column_id
 
     if new_order is not None:

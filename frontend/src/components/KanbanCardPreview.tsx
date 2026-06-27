@@ -1,4 +1,4 @@
-import type { Card } from "@/lib/kanban";
+import type { Card } from "@/lib/api";
 
 type KanbanCardPreviewProps = {
   card: Card;
