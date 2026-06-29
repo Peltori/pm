@@ -220,7 +220,7 @@ export function KanbanBoard() {
           <KanbanColumn
             key={column.id}
             value={colKey(column.id)}
-            className="w-[320px] flex-shrink-0"
+            className="w-[320px] min-w-[220px]"
           >
             <section
               className="flex flex-col rounded-3xl border border-[var(--stroke)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow)] transition"
