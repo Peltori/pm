@@ -1,31 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
-  const getInitialTheme = (): string => {
-    if (typeof window === "undefined") return "light";
+  const [theme, setTheme] = useState<string | null>(null);
+
+  useEffect(() => {
     const stored = localStorage.getItem("theme");
     const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    return stored || (systemDark ? "dark" : "light");
-  };
-
-  const [theme, setTheme] = useState(getInitialTheme);
-
-  const applyTheme = (t: string) => {
-    if (typeof document !== "undefined") {
-      document.documentElement.setAttribute("data-theme", t);
-    }
-  };
-
-  applyTheme(theme);
+    const t = stored || (systemDark ? "dark" : "light");
+    setTheme(t);
+    document.documentElement.setAttribute("data-theme", t);
+  }, []);
 
   function toggle() {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
     localStorage.setItem("theme", next);
-    applyTheme(next);
+    document.documentElement.setAttribute("data-theme", next);
   }
+
+  if (theme === null) return null;
 
   return (
     <button
