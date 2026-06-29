@@ -8,11 +8,11 @@ import type { BoardUpdate } from "@/lib/api";
 
 export default function Home() {
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleBoardUpdate = (update: BoardUpdate) => {
-    // The KanbanBoard will auto-refresh when AI updates are applied
-    // This is handled by the backend route, but we can trigger a manual refresh if needed
-    console.log("Board update received:", update);
+    // Force KanbanBoard to remount and re-fetch fresh data from API
+    setRefreshKey((k) => k + 1);
   };
 
   return (
@@ -22,7 +22,7 @@ export default function Home() {
       <main className="relative mx-auto flex min-h-screen max-w-[1500px] flex-col gap-10 px-6 pb-16 pt-12">
         <Header onAiToggle={() => setIsAiOpen(!isAiOpen)} isAiOpen={isAiOpen} />
         <div className="flex gap-6">
-          <KanbanBoard />
+          <KanbanBoard key={refreshKey} />
           {isAiOpen && (
             <AIChatSidebar onBoardUpdate={handleBoardUpdate} onClose={() => setIsAiOpen(false)} />
           )}
