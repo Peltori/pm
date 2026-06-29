@@ -2,12 +2,12 @@ FROM node:22-bookworm-slim AS frontend-build
 
 WORKDIR /app
 
-COPY frontend/package.json frontend/package-lock.json ./frontend/
+COPY frontend/package.json frontend/pnpm-lock.yaml frontend/.npmrc ./frontend/
 WORKDIR /app/frontend
-RUN npm ci
+RUN npm install -g pnpm && pnpm install --frozen-lockfile --ignore-scripts
 
 COPY frontend/ .
-RUN CI=true npm run build
+RUN CI=true pnpm run build
 
 FROM python:3.12-slim AS backend-build
 
@@ -18,7 +18,6 @@ RUN pip install --no-cache-dir uv && \
     uv lock && uv sync --frozen --no-dev
 
 COPY backend/app/ ./app/
-COPY .env /app/backend/.env
 
 FROM python:3.12-slim
 
@@ -31,7 +30,6 @@ WORKDIR /app/backend
 
 COPY --from=backend-build /app/backend/.venv /app/backend/.venv
 COPY --from=backend-build /app/backend/app /app/backend/app
-COPY --from=backend-build /app/backend/.env /app/backend/.env
 
 # Next.js standalone build
 COPY --from=frontend-build /app/frontend/.next/standalone /app/standalone
@@ -43,5 +41,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PORT=3000
 
 EXPOSE 3000 8000
+
+ENTRYPOINT []
 
 CMD ["sh", "-c", "node /app/standalone/server.js & uvicorn app.main:app --host 0.0.0.0 --port 8000"]

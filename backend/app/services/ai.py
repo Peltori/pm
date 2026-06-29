@@ -40,7 +40,7 @@ async def test_ai() -> str:
     """Simple 2+2 test to verify AI connectivity."""
     client = _get_client()
     response = await client.chat.completions.create(
-        model="google/gemma-4-26b-a4b-it:free",
+        model="openrouter/free",
         messages=[
             {"role": "user", "content": "What is 2+2? Answer with just the number."}
         ],
@@ -52,7 +52,7 @@ async def test_structured_output() -> str:
     """Test structured JSON output from the model."""
     client = _get_client()
     response = await client.chat.completions.create(
-        model="google/gemma-4-26b-a4b-it:free",
+        model="openrouter/free",
         messages=[
             {"role": "user", "content": "Respond with a JSON object containing exactly one key 'greeting' with the value 'hello world'."}
         ],
@@ -166,7 +166,7 @@ async def chat(board: dict, user_message: str, history: list[dict] | None = None
     messages = build_messages(board, user_message, history)
 
     response = await client.chat.completions.create(
-        model="google/gemma-4-26b-a4b-it:free",
+        model="openrouter/free",
         messages=messages,
         extra_body={
             "response_format": {
