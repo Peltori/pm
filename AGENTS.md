@@ -16,11 +16,11 @@ For the MVP, there will only be a user sign in (hardcoded to 'user' and 'passwor
 
 For the MVP, there will only be 1 Kanban board per signed in user.
 
-For the MVP, this will run locally (in a docker container)
+For the MVP, this runs in a Docker container. Deployment targets: Docker-based platforms (Render, Fly.io, Railway) or moving API routes to Next.js serverless functions for Vercel.
 
 ## Technical Decisions
 
-- NextJS frontend with tailwind css for styling and shadcn ui elements for easy component building
+- NextJS frontend with tailwind css for styling and @dnd-kit for drag-and-drop
 - Use pnpm for frontend dependency management
 - Python FastAPI backend, including serving the static NextJS site at /
 - Everything packaged into a Docker container
@@ -32,7 +32,7 @@ For the MVP, this will run locally (in a docker container)
 
 ## Starting Point
 
-A working MVP of the frontend has been built and is already in frontend. This is not yet designed for the Docker setup. It's a pure frontend-only demo.
+A working MVP of the frontend has been built in the `frontend/` directory. It is fully integrated with the Docker setup and backend API.
 
 ## Color Scheme
 
