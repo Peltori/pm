@@ -6,7 +6,30 @@
 - Python 3.11+ with uv
 - OPENROUTER_API_KEY in `.env` at project root
 
-## Starting Locally
+## After a Fresh Clone
+
+1. **Install frontend dependencies:**
+   ```bash
+   cd frontend
+   pnpm install
+   ```
+
+2. **Set up backend virtual environment:**
+   ```bash
+   cd backend
+   uv venv
+   source .venv/bin/activate   # On Windows: .venv\Scripts\activate
+   uv pip install -e .
+   ```
+
+3. **Create `.env` file at project root:**
+   ```bash
+   echo 'OPENROUTER_API_KEY=sk-or-v1-your-key-here' > ../.env
+   ```
+
+4. **Start the servers** (see below).
+
+## Running Locally
 
 Two processes must run simultaneously:
 
@@ -38,8 +61,26 @@ The frontend dev server runs on port 3000 and proxies all `/api/*` requests to t
 ./scripts/stop.sh
 ```
 
+## Testing
+
+### Frontend
+```bash
+cd frontend
+pnpm test:unit    # Vitest unit tests
+pnpm test:e2e     # Playwright E2E tests
+pnpm test:all     # Both
+```
+
+### Backend
+```bash
+cd backend
+pytest
+```
+
 ## Notes
 
 - The dev server uses Turbopack for fast hot-reload
 - Changes to either frontend or backend trigger auto-reload (frontend via Turbopack, backend via uvicorn's `--reload`)
-- The `.env` file must be at the project root (`/pm/.env`) for the backend to pick up `OPENROUTER_API_KEY`
+- The `.env` file must be at the project root for the backend to pick up `OPENROUTER_API_KEY`
+- E2E tests start their own Next.js dev server; ensure no other process is on port 3000 before running them
+- The database file is created automatically in `backend/` if it doesn't exist

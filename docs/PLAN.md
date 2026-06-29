@@ -9,12 +9,18 @@
 | Backend     | Python FastAPI                      |
 | Package Mgr | pnpm (frontend), uv (backend)       |
 | Database    | SQLite (normalized tables)          |
-| AI          | OpenRouter (`openrouter/free`) |
-| Auth        | Session-based (server-side sessions) |
+| AI          | OpenRouter (`openrouter/free`)      |
+| Auth        | Cookie-based session                |
 | Container   | Docker + docker-compose             |
-| Unit Tests  | Vitest + @testing-library/react     |
+| Unit Tests  | Vitest                              |
 | E2E Tests   | Playwright                          |
-| Backend Tests | pytest + httpx                   |
+| Backend Tests | pytest + httpx                    |
+
+## Deployment
+
+- **Docker** (recommended): Single container with both frontend and backend. Deploy to Render, Fly.io, Railway, or any Docker host.
+- **Vercel**: Requires moving API routes into Next.js serverless functions (not supported as-is with separate FastAPI backend).
+- The `.env` file at project root contains `OPENROUTER_API_KEY`.
 
 ---
 
