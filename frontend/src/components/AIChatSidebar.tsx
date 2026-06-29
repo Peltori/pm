@@ -3,12 +3,15 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { aiChat, type ChatMessage, type BoardUpdate } from "@/lib/api";
 
+const SIDEBAR_WIDTH = 380;
+
 interface AIChatSidebarProps {
+  isOpen: boolean;
   onBoardUpdate: (update: BoardUpdate) => void;
   onClose: () => void;
 }
 
-export function AIChatSidebar({ onBoardUpdate, onClose }: AIChatSidebarProps) {
+export function AIChatSidebar({ isOpen, onBoardUpdate, onClose }: AIChatSidebarProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -70,8 +73,20 @@ export function AIChatSidebar({ onBoardUpdate, onClose }: AIChatSidebarProps) {
     }
   };
 
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
+
   return (
-    <aside className="flex w-[380px] flex-col border-l border-[var(--border)] bg-[var(--bg-strong)] shadow-[-20px_0_30px_rgba(0,0,0,0.1)]">
+    <aside
+      className={`fixed right-0 top-0 z-50 flex h-screen w-[${SIDEBAR_WIDTH}px] flex-col border-l border-[var(--border)] bg-[var(--bg-strong)] shadow-[-20px_0_30px_rgba(0,0,0,0.1)] transition-transform duration-300 ${
+        isOpen ? "translate-x-0" : "translate-x-full"
+      }`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
         <h2 className="font-display text-lg font-semibold text-[var(--text)]">
