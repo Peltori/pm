@@ -62,7 +62,6 @@ export function KanbanBoard() {
   const refreshBoard = useCallback(async () => {
     try {
       const board = await getBoard();
-      if (!board.id) return;
       setState((prev) => ({
         ...prev,
         boardId: board.id ?? prev.boardId,
