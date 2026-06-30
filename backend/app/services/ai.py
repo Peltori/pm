@@ -180,6 +180,23 @@ async def chat(board: dict, user_message: str, history: list[dict] | None = None
     )
 
     content = response.choices[0].message.content or "{}"
+    # Strip markdown code fences if present
+    content = content.strip()
+    if content.startswith("```"):
+        lines = content.split("\n")
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        content = "\n".join(lines).strip()
+    
+    # If content still doesn't start with {, try to extract JSON from it
+    if not content.startswith("{") and not content.startswith("["):
+        import re
+        json_match = re.search(r'\{.*\}|\[.*\]', content, re.DOTALL)
+        if json_match:
+            content = json_match.group(0)
+    
     try:
         result = json.loads(content)
     except json.JSONDecodeError:
