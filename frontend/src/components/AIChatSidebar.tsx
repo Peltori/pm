@@ -61,6 +61,8 @@ export function AIChatSidebar({ isOpen, onBoardUpdate, onClose }: AIChatSidebarP
         content: "Sorry, something went wrong. Please try again.",
       };
       setMessages([...newMessages, errorMessages]);
+      // Trigger a board refresh in case the backend already applied changes
+      onBoardUpdate({});
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +85,7 @@ export function AIChatSidebar({ isOpen, onBoardUpdate, onClose }: AIChatSidebarP
 
   return (
     <aside
-      className={`fixed right-0 top-0 z-50 flex h-screen w-[${SIDEBAR_WIDTH}px] flex-col border-l border-[var(--border)] bg-[var(--bg-strong)] shadow-[-20px_0_30px_rgba(0,0,0,0.1)] transition-transform duration-300 ${
+      className={`fixed right-0 top-0 z-50 flex h-screen w-[380px] flex-col border-l border-[var(--border)] bg-[var(--bg-strong)] shadow-[-20px_0_30px_rgba(0,0,0,0.1)] transition-transform duration-300 ${
         isOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
@@ -127,7 +129,7 @@ export function AIChatSidebar({ isOpen, onBoardUpdate, onClose }: AIChatSidebarP
                 className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                  className={`max-w-[85%] break-words rounded-2xl px-4 py-3 ${
                     message.role === "user"
                       ? "bg-[var(--primary-blue)] text-white"
                       : "bg-[var(--bg)] text-[var(--text)]"
@@ -139,7 +141,7 @@ export function AIChatSidebar({ isOpen, onBoardUpdate, onClose }: AIChatSidebarP
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="max-w-[85%] rounded-2xl bg-[var(--bg)] px-4 py-3">
+                <div className="max-w-[85%] break-words rounded-2xl bg-[var(--bg)] px-4 py-3">
                   <div className="flex gap-1.5">
                     <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--primary-blue)]" style={{ animationDelay: "0ms" }} />
                     <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--primary-blue)]" style={{ animationDelay: "150ms" }} />
