@@ -8,6 +8,7 @@ A Project Management App featuring a Kanban board with drag-and-drop card manage
 - Kanban board with renameable columns and drag-and-drop cards
 - AI chat sidebar to manage board content (create, edit, move cards)
 - Dark/light mode toggle
+- App can be deployed using Docker
 
 ## Tech Stack
 
