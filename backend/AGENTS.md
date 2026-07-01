@@ -9,11 +9,16 @@ backend/
   app/
     __init__.py
     main.py          # FastAPI app entry, health + static file serving
-    ai.py            # OpenRouter client (openrouter/free)
-    ai_routes.py     # /api/ai/test endpoint
-    database/        # (Part 5+) SQLAlchemy models, sessions
-    routes/          # (Part 6+) API route handlers
-    services/        # (Part 6+) business logic
+    ai_routes.py     # /api/ai endpoints
+    database.py      # SQLAlchemy models, sessions, seed data
+    schemas.py       # Pydantic request/response schemas
+    routes/
+      __init__.py
+      boards.py      # Board CRUD routes
+    services/
+      __init__.py
+      ai.py          # OpenRouter client (openrouter/free)
+      board_service.py # Business logic for board operations
   tests/
     test_main.py     # Health endpoint test
     test_ai.py       # AI connectivity test

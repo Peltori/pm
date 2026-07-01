@@ -3,13 +3,13 @@
 ## Run
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 ## Tests
 
 ```bash
-npm run test:unit
-npm run test:e2e
+pnpm run test:unit
+pnpm run test:e2e
 ```

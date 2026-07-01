@@ -14,18 +14,22 @@ frontend/
       page.tsx              # Entry point - renders KanbanBoard
       globals.css           # Tailwind + CSS custom properties (color scheme)
     components/
+      Header.tsx            # Header with theme toggle and AI chat toggle
+      ThemeToggle.tsx       # Dark/light mode toggle button
       KanbanBoard.tsx       # Main board component with DnD context
-      KanbanColumn.tsx      # Column component with droppable zone
-      KanbanCard.tsx        # Individual card with sortable handle
       KanbanCardPreview.tsx # Drag overlay preview
       NewCardForm.tsx       # Inline form for adding cards
+      AIChatSidebar.tsx     # AI chat sidebar widget
+    components/ui/          # UI components
     lib/
+      api.ts                # API client for backend calls
       kanban.ts             # Types (Card, Column, BoardData), initial data, move logic
       kanban.test.ts        # Unit tests for moveCard logic
     test/
       setup.ts              # Vitest setup (imports jest-dom matchers)
       vitest.d.ts           # Type declarations for test environment
     components/KanbanBoard.test.tsx  # Component tests (render, rename, add/remove)
+    components/AIChatSidebar.test.tsx # AI chat sidebar tests
   tests/
     kanban.spec.ts          # Playwright E2E tests
 ```
